@@ -4,12 +4,13 @@ import Image from "next/image";
 export function FrenzyLogo() {
   return (
     <Link href="/" aria-label="BWICK home" className="inline-flex items-center">
-      <span className="relative block h-[42px] w-[132px] overflow-hidden">
+      <span className="relative block h-8 w-8 overflow-hidden rounded-[9px] shadow-[0_2px_8px_rgba(255,116,72,0.28)]">
         <Image
-          src="/signal-2026-05-14-115530_002.jpeg"
+          src="/bwick-icon-32.19b13da7.png"
           alt="BWICK"
-          fill
-          className="object-cover object-center scale-[1.35]"
+          width={32}
+          height={32}
+          className="h-full w-full object-cover"
           priority
         />
       </span>

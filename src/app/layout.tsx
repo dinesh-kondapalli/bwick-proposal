@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${sfProRounded.variable} antialiased`}>
+      <body className={`${sfProRounded.variable} antialiased`} suppressHydrationWarning>
         <div className="relative z-10">
           <Providers>{children}</Providers>
         </div>

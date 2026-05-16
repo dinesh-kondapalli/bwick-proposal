@@ -127,12 +127,12 @@ const bannerLogoClearRects = [
 ] as const;
 
 const customBannerLogos = [
-  { src: "/fire.png", alt: "Fire", left: "10%", top: "24%", size: "clamp(34px, 7vw, 62px)", tilt: "-8deg", delay: "0s" },
-  { src: "/ruby.png", alt: "Ruby", left: "24%", top: "61%", size: "clamp(32px, 6.5vw, 58px)", tilt: "7deg", delay: "0.2s" },
-  { src: "/green-arrow.png", alt: "Green arrow", left: "37%", top: "25%", size: "clamp(32px, 6.2vw, 56px)", tilt: "-5deg", delay: "0.4s" },
-  { src: "/green-belan.png", alt: "Green belan", left: "51%", top: "59%", size: "clamp(30px, 5.8vw, 52px)", tilt: "-7deg", delay: "0.1s" },
-  { src: "/diamond.png", alt: "Diamond", left: "66%", top: "25%", size: "clamp(32px, 6.4vw, 58px)", tilt: "8deg", delay: "0.3s" },
-  { src: "/gold.png", alt: "Gold", left: "84%", top: "48%", size: "clamp(34px, 6.8vw, 60px)", tilt: "-6deg", delay: "0.5s" },
+  { src: "/fire.png", alt: "Fire", left: "5%", top: "23%", size: "clamp(34px, 7vw, 62px)", tilt: "-8deg", delay: "0s", duration: "2.45s" },
+  { src: "/ruby.png", alt: "Ruby", left: "16%", top: "68%", size: "clamp(32px, 6.5vw, 58px)", tilt: "7deg", delay: "0.3s", duration: "3.1s" },
+  { src: "/green-arrow.png", alt: "Green arrow", left: "30%", top: "20%", size: "clamp(32px, 6.2vw, 56px)", tilt: "-5deg", delay: "0.65s", duration: "2.7s" },
+  { src: "/green-belan.png", alt: "Green belan", left: "71%", top: "69%", size: "clamp(30px, 5.8vw, 52px)", tilt: "-7deg", delay: "0.15s", duration: "3.35s" },
+  { src: "/diamond.png", alt: "Diamond", left: "84%", top: "22%", size: "clamp(32px, 6.4vw, 58px)", tilt: "8deg", delay: "0.5s", duration: "2.6s" },
+  { src: "/gold.png", alt: "Gold", left: "95%", top: "52%", size: "clamp(34px, 6.8vw, 60px)", tilt: "-6deg", delay: "0.9s", duration: "3s" },
 ] as const;
 
 // Every memo-based proposal (the treasury system) is a *chain* proposal.
@@ -385,6 +385,7 @@ function SocialBanner() {
                 width: logo.size,
                 height: logo.size,
                 animationDelay: logo.delay,
+                animationDuration: logo.duration,
                 transform: `translate(-50%, -50%) rotate(${logo.tilt})`,
               }}
             >
