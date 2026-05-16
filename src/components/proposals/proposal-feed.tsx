@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Fit, Layout, useRive } from "@rive-app/react-canvas";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -105,6 +106,35 @@ const typeMeta = {
 
 type FeedTab = "all" | "chain" | "tokens";
 
+const bannerLogoClearRegions = [
+  { left: 8, top: 20, size: "lg" },
+  { left: 11, top: 69, size: "lg" },
+  { left: 24, top: 49, size: "md" },
+  { left: 34, top: 29, size: "md" },
+  { left: 39, top: 65, size: "lg" },
+  { left: 43, top: 60, size: "lg" },
+  { left: 47, top: 58, size: "lg" },
+  { left: 52, top: 32, size: "sm" },
+  { left: 57, top: 20, size: "md" },
+  { left: 70, top: 50, size: "md" },
+  { left: 83, top: 22, size: "md" },
+  { left: 92, top: 34, size: "lg" },
+] as const;
+
+const bannerLogoClearRects = [
+  { left: 31, top: 20, width: 34, height: 74 },
+  { left: 64, top: 45, width: 20, height: 50 },
+] as const;
+
+const customBannerLogos = [
+  { src: "/fire.png", alt: "Fire", left: "10%", top: "24%", size: "clamp(34px, 7vw, 62px)", tilt: "-8deg", delay: "0s" },
+  { src: "/ruby.png", alt: "Ruby", left: "24%", top: "61%", size: "clamp(32px, 6.5vw, 58px)", tilt: "7deg", delay: "0.2s" },
+  { src: "/green-arrow.png", alt: "Green arrow", left: "37%", top: "25%", size: "clamp(32px, 6.2vw, 56px)", tilt: "-5deg", delay: "0.4s" },
+  { src: "/green-belan.png", alt: "Green belan", left: "51%", top: "59%", size: "clamp(30px, 5.8vw, 52px)", tilt: "-7deg", delay: "0.1s" },
+  { src: "/diamond.png", alt: "Diamond", left: "66%", top: "25%", size: "clamp(32px, 6.4vw, 58px)", tilt: "8deg", delay: "0.3s" },
+  { src: "/gold.png", alt: "Gold", left: "84%", top: "48%", size: "clamp(34px, 6.8vw, 60px)", tilt: "-6deg", delay: "0.5s" },
+] as const;
+
 // Every memo-based proposal (the treasury system) is a *chain* proposal.
 // Token metadata changes live in the launchpad's own per-token vote and
 // aren't surfaced here, so the Tokens tab stays empty in this app and
@@ -204,8 +234,9 @@ function SocialBanner() {
   const [isSmall, setIsSmall] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const innerRef = useRef<HTMLDivElement>(null);
+  const processedCanvasRef = useRef<HTMLCanvasElement>(null);
   const [gradientSize, setGradientSize] = useState(0);
-  const { RiveComponent } = useRive({
+  const { RiveComponent, canvas: sourceCanvas, setContainerRef } = useRive({
     src: "/fetch_v2.riv",
     stateMachines: "State Machine 1",
     layout: new Layout({ fit: Fit.Layout, layoutScaleFactor: (isSmall ? 55 : 85) / 100 }),
@@ -234,6 +265,73 @@ function SocialBanner() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  useEffect(() => {
+    const outputCanvas = processedCanvasRef.current;
+    if (!sourceCanvas || !outputCanvas || !isLoaded) return;
+
+    const context = outputCanvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return;
+
+    let frameId = 0;
+
+    const paint = () => {
+      const width = sourceCanvas.width;
+      const height = sourceCanvas.height;
+
+      if (width > 0 && height > 0) {
+        if (outputCanvas.width !== width || outputCanvas.height !== height) {
+          outputCanvas.width = width;
+          outputCanvas.height = height;
+        }
+
+        context.clearRect(0, 0, width, height);
+        context.drawImage(sourceCanvas, 0, 0, width, height);
+
+        const image = context.getImageData(0, 0, width, height);
+        const data = image.data;
+
+        for (let index = 0; index < data.length; index += 4) {
+          const red = data[index];
+          const green = data[index + 1];
+          const blue = data[index + 2];
+          const alpha = data[index + 3];
+
+          if (alpha === 0) continue;
+
+          const blueDominant = blue > 110 && blue > red + 45 && blue > green + 12;
+          const likelyBackground = red < 90 && green < 170;
+
+          if (!blueDominant || !likelyBackground) continue;
+
+          data[index + 3] = 0;
+        }
+
+        context.putImageData(image, 0, 0);
+
+        for (const region of bannerLogoClearRegions) {
+          const radius = height * (region.size === "lg" ? 0.5 : region.size === "md" ? 0.42 : 0.34);
+          const centerX = width * (region.left / 100);
+          const centerY = height * (region.top / 100);
+          context.clearRect(centerX - radius, centerY - radius, radius * 2, radius * 2);
+        }
+
+        for (const region of bannerLogoClearRects) {
+          context.clearRect(
+            width * (region.left / 100),
+            height * (region.top / 100),
+            width * (region.width / 100),
+            height * (region.height / 100),
+          );
+        }
+      }
+
+      frameId = window.requestAnimationFrame(paint);
+    };
+
+    frameId = window.requestAnimationFrame(paint);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isLoaded, sourceCanvas]);
+
   const borderRadius = isSmall ? 16 : 23;
   const borderWidth = isSmall ? 1.5 : 3;
   const outerRadius = borderRadius + borderWidth;
@@ -257,8 +355,42 @@ function SocialBanner() {
             animation: isLoaded ? "frenzy-rainbow-rotate 3s linear infinite" : "none",
           }}
         />
-        <div ref={innerRef} className="relative h-[59px] overflow-hidden bg-white sm:h-[120px]" style={{ borderRadius }}>
-          <RiveComponent className="h-full w-full" />
+        <div
+          ref={(node) => {
+            innerRef.current = node;
+            setContainerRef(node);
+          }}
+          className="relative h-[59px] overflow-hidden bg-[#f5e5cf] sm:h-[120px]"
+          style={{
+            borderRadius,
+            backgroundImage: 'url("/IMG_2722.png")',
+            backgroundPosition: "center bottom",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+          }}
+        >
+          <RiveComponent className="absolute inset-0 h-full w-full opacity-0" />
+          <canvas
+            ref={processedCanvasRef}
+            className="absolute inset-0 h-full w-full"
+            style={{ borderRadius }}
+          />
+          {customBannerLogos.map((logo) => (
+            <div
+              key={logo.src}
+              className="custom-banner-logo pointer-events-none absolute z-10 drop-shadow-[0_8px_14px_rgba(0,0,0,0.22)]"
+              style={{
+                left: logo.left,
+                top: logo.top,
+                width: logo.size,
+                height: logo.size,
+                animationDelay: logo.delay,
+                transform: `translate(-50%, -50%) rotate(${logo.tilt})`,
+              }}
+            >
+              <Image src={logo.src} alt={logo.alt} fill sizes="64px" className="object-contain" />
+            </div>
+          ))}
           {!isLoaded ? <div className="absolute inset-0 animate-pulse bg-[#eef4ff]" style={{ borderRadius }} /> : null}
         </div>
       </div>

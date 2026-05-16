@@ -229,6 +229,17 @@
     }
   }
 
+  @keyframes custom-banner-float {
+    0%,
+    100% {
+      translate: 0 -2px;
+    }
+
+    50% {
+      translate: 0 4px;
+    }
+  }
+
   .ticker-shake {
     animation: ticker-shake 2.2s ease-in-out infinite;
     transform-origin: center;
@@ -326,6 +337,10 @@
 
   .frenzy-banner-logo-active {
     animation: frenzy-banner-pop 420ms ease-out;
+  }
+
+  .custom-banner-logo {
+    animation: custom-banner-float 2.8s ease-in-out infinite;
   }
 
   .bento-shell {
